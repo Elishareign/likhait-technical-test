@@ -16,16 +16,7 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-prootpassword",
-        ]
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,14 +41,13 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./backend:/rails
-      - backend_gems:/usr/local/bundle
+      - ./backend:/rails:cached
     command: >
       sh -c "
-        bundle install &&
-        rails db:migrate &&
-        rails db:seed &&
-        rails server -b 0.0.0.0
+        rm -f tmp/pids/server.pid &&
+        bundle exec rails db:migrate &&
+        bundle exec rails db:seed &&
+        bundle exec rails server -b 0.0.0.0
       "
     networks:
       - expense_network
@@ -82,7 +72,6 @@ services:
 
 volumes:
   mysql_data:
-  backend_gems:
   frontend_node_modules:
 
 networks:
