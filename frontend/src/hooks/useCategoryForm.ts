@@ -1,5 +1,5 @@
 /**
- * Custom hook for managing category form state and validation
+ * Custom hook for managing category form state with real-time validation
  */
 
 import { useState } from "react";
@@ -26,50 +26,41 @@ export function useCategoryForm({
   const [errors, setErrors] = useState<Partial<Record<keyof CategoryFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Field-level validation
+  const validateField = (field: keyof CategoryFormData, value: string) => {
+    let error: string | undefined;
+
+    const trimmed = value.trim();
+
+    if (field === "name") {
+      if (!trimmed) error = "Category name is required";
+      else if (trimmed.length < MIN_NAME_LENGTH)
+        error = `Category name must be at least ${MIN_NAME_LENGTH} characters`;
+      else if (trimmed.length > MAX_NAME_LENGTH)
+        error = `Category name must be less than ${MAX_NAME_LENGTH} characters`;
+      else if (!CATEGORY_NAME_REGEX.test(trimmed))
+        error = "Category name contains invalid characters";
+    }
+
+    setErrors((prev) => ({ ...prev, [field]: error }));
+    return !error;
+  };
+
+  const validateForm = (): boolean => {
+    const isValid = validateField("name", formData.name);
+    return isValid;
+  };
+
   const handleChange = (field: keyof CategoryFormData, value: string) => {
     // Normalize multiple spaces into a single space
     const sanitizedValue = value.replace(/\s+/g, " "); 
 
     setFormData((prev) => ({ ...prev, [field]: sanitizedValue }));
-
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors: Partial<Record<keyof CategoryFormData, string>> = {};
-    const name = formData.name.trim();
-
-    // Required validation
-    if (!name) {
-      newErrors.name = "Category name is required";
-    }
-
-    // Minimum length
-    else if (name.length < MIN_NAME_LENGTH) {
-      newErrors.name = "Category name must be at least 2 characters";
-    }
-
-    // Maximum length
-    else if (name.length > MAX_NAME_LENGTH) {
-      newErrors.name = "Category name must be less than 100 characters";
-    }
-
-    // Allowlist validation (OWASP recommendation)
-    else if (!CATEGORY_NAME_REGEX.test(name)) {
-      newErrors.name =
-        "Category name contains invalid characters";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
+    validateField(field, sanitizedValue); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     // Prevent duplicate form submissions
     if (isSubmitting) return;
 
@@ -79,10 +70,7 @@ export function useCategoryForm({
 
     try {
       // Trim whitespace before submitting data to backend
-      const sanitizedData = {
-        name: formData.name.trim(),
-      };
-
+      const sanitizedData = { name: formData.name.trim() };
       await onSubmit(sanitizedData);
 
       setFormData({ name: "" });
@@ -95,10 +83,7 @@ export function useCategoryForm({
   };
 
   const resetForm = () => {
-    setFormData({
-      name: initialData?.name ?? "",
-    });
-
+    setFormData({ name: initialData?.name ?? "" });
     setErrors({});
   };
 
