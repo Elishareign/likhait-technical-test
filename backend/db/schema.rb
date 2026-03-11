@@ -24,7 +24,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_09_143922) do
     t.string "description", null: false
     t.decimal "amount", precision: 10, scale: 2, null: false
     t.integer "category_id", null: false
-    t.string "payer_name", limit: 100, null: false
     t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }
     t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" }
     t.date "date"

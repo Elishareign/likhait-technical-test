@@ -148,7 +148,6 @@ while current_date <= end_date
         date: current_date,
         created_at: current_date,
         updated_at: current_date,
-        payer_name: "John Doe"
       )
 
       expense_count += 1
