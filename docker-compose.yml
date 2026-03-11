@@ -58,7 +58,9 @@ services:
       dockerfile: Dockerfile
     container_name: expense_system_frontend
     environment:
-      VITE_API_URL: http://localhost:3000
+      - VITE_API_URL=http://localhost:3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     ports:
       - "5173:5173"
     depends_on:
