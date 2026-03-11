@@ -9,8 +9,16 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential ca-certificates default-mysql-client default-libmysqlclient-dev git && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y \
+    build-essential \
+    ca-certificates \
+    default-mysql-client \
+    default-libmysqlclient-dev \
+    git \
+    libyaml-dev \
+    pkg-config \
+    dos2unix && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -23,12 +31,17 @@ RUN bundle config set --local deployment 'false' && \
 # Copy application code
 COPY . .
 
-# Precompile bootsnap code for faster boot times
+# Fix line endings for Rails executables
+RUN dos2unix bin/*
+
+# Precompile bootsnap for faster boot times
 RUN bundle exec bootsnap precompile --gemfile app/ lib/
 
 # Entrypoint prepares the database
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start the server by default
+# Expose Rails port
 EXPOSE 3000
-CMD ["rails", "server", "-b", "0.0.0.0"]
+
+# Start the Rails server
+CMD ["bash", "-c", "rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0"]
