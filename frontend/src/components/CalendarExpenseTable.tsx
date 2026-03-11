@@ -133,7 +133,16 @@ export function CalendarExpenseTable({
           {currentExpenses.map((expense) => (
             <tr key={expense.id}>
               <td style={tdStyle}>{formatDate(new Date(expense.date))}</td>
-              <td style={tdStyle}>{expense.description}</td>
+              <td
+                style={{
+                  ...tdStyle,
+                  maxWidth: "300px",       
+                  whiteSpace: "normal",    
+                  wordBreak: "break-word", 
+                }}
+              >
+                {expense.description}
+              </td>
               <td style={tdStyle}>
                 <span
                   style={{
