@@ -47,6 +47,8 @@ export function ExpenseForm({
     marginTop: "0.5rem",
   };
 
+  const today = new Date().toLocaleDateString("en-CA");
+
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
       <TextField
@@ -95,6 +97,7 @@ export function ExpenseForm({
         error={errors.date}
         fullWidth
         required
+        max={today}
       />
 
       <div style={buttonGroupStyle}>
